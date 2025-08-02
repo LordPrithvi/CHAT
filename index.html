@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Realtime Chat</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      background: #1f1f1f;
+      padding: 15px;
+      text-align: center;
+      font-size: 1.5em;
+    }
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+    .msg {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 10px;
+      max-width: 60%;
+    }
+    .me {
+      align-self: flex-end;
+      background-color: #056162;
+    }
+    .other {
+      align-self: flex-start;
+      background-color: #2f2f2f;
+    }
+    #inputBox {
+      display: flex;
+      padding: 10px;
+      background: #1f1f1f;
+    }
+    input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      margin-left: 10px;
+      border: none;
+      border-radius: 5px;
+      background: #056162;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <header>💬 Chat with Friends</header>
+  <div id="chat"></div>
+
+  <div id="inputBox">
+    <input id="msgInput" placeholder="Type a message..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+  <script>
+    // ✅ Your actual Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyA6nNp9rkCUyBxd3N5V5eN_XMJpYXtvbD0",
+      authDomain: "chatapp-b9a5c.firebaseapp.com",
+      databaseURL: "https://chatapp-b9a5c-default-rtdb.firebaseio.com",
+      projectId: "chatapp-b9a5c",
+      storageBucket: "chatapp-b9a5c.appspot.com",
+      messagingSenderId: "878842125731",
+      appId: "1:878842125731:web:380012c0ef294d9d61eebf"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const messagesRef = db.ref('messages');
+
+    const chat = document.getElementById('chat');
+    const msgInput = document.getElementById('msgInput');
+    const userId = 'user_' + Math.random().toString(36).substring(2, 8);
+
+    function sendMessage() {
+      const text = msgInput.value.trim();
+      if (text) {
+        messagesRef.push({ user: userId, text });
+        msgInput.value = '';
+      }
+    }
+
+    msgInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    messagesRef.on('child_added', snapshot => {
+      const msg = snapshot.val();
+      const msgDiv = document.createElement('div');
+      msgDiv.classList.add('msg', msg.user === userId ? 'me' : 'other');
+      msgDiv.textContent = msg.text;
+      chat.appendChild(msgDiv);
+      chat.scrollTop = chat.scrollHeight;
+    });
+  </script>
+</body>
+</html>
